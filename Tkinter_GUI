@@ -1,0 +1,193 @@
+#!/usr/bin/env python
+
+# zFa3 - Tkinter_Sorting
+# Tkinter Sorting Animations
+import tkinter as tk, random as rd, time as tm
+
+SCREEN_WID = 600
+ELEMENTS_TO_SORT = 50
+PADDING = 20
+PADDING = 0
+HEIGHT = 0
+RANDOMIZER = ELEMENTS_TO_SORT * 2
+VALUE_MULTIPLIER = (SCREEN_WID - PADDING * 2)//ELEMENTS_TO_SORT
+STATIC_COLOR = (255, 50, 10)
+DELAY = 100
+DELAY = 5
+
+elements = [abs(i - ELEMENTS_TO_SORT) for i in range(ELEMENTS_TO_SORT)]
+ELEM_WID = (SCREEN_WID - PADDING * 2)//ELEMENTS_TO_SORT
+SIDE_PADDING = int(ELEM_WID * 0.1)
+ELEMENTS_TO_SORT = min(SCREEN_WID - PADDING * 2, ELEMENTS_TO_SORT)
+
+root = tk.Tk()
+root.geometry(f"{SCREEN_WID}x{SCREEN_WID}")
+root.title("Sorting Algorithms")
+canvas = tk.Canvas(root, width=SCREEN_WID - PADDING * 2, height=SCREEN_WID - PADDING * 2)
+
+def shuffle(elements: list):
+        new_lst = elements[:]
+        for _ in range(RANDOMIZER):
+            a, b = rd.randint(0, len(elements) - 1), rd.randint(0, len(elements) - 1)
+            new_lst[a], new_lst[b] = new_lst[b], new_lst[a]
+        return new_lst
+
+elements = shuffle(elements)
+
+def rand_col(event):
+    global STATIC_COLOR
+    STATIC_COLOR = (rd.randint(0, 200),rd.randint(0, 100), rd.randint(150, 250))
+
+def set_elements(list: list):
+    global elements
+    elements = list[:]
+
+
+
+def main():
+    global elements
+
+    def randomize(e):
+        global elements
+        elements = shuffle(elements)
+        draw(elements)
+
+    def add_tups(tup: tuple):
+        return tuple(map(lambda x, y: min(x + y, 255), STATIC_COLOR, tup))
+
+    def counter():
+        pass
+
+    def draw_elem(item):
+        canvas.after(DELAY, counter)
+        canvas.create_line(item[0][1], item[0][0], item[0][1], item[0][0] - item[1], width=ELEM_WID - SIDE_PADDING, fill=f"{rgb_to_hex((add_tups((int(item[2]/ELEMENTS_TO_SORT * 255), int(item[2]/ELEMENTS_TO_SORT * 255), int(item[2]/ELEMENTS_TO_SORT * 255)))))}")
+
+    def draw(elements: list):
+        canvas.delete("all")
+        for index, item in enumerate(elements):
+            draw_elem(((abs(HEIGHT - 600), int(index * int(ELEM_WID) + int(PADDING))), item * VALUE_MULTIPLIER, item))
+            canvas.pack()
+    
+    def inverted(rgb: tuple):
+        return (abs(rgb[0] - 255), abs(rgb[1] - 255), abs(rgb[2] - 255))
+
+    def rgb_to_hex(rgb):
+        return "#%02x%02x%02x" % inverted(rgb)
+
+    def bubble_sort(event):
+        time1 = tm.perf_counter()
+        list_A = elements[:]
+        writes_to_array = 0
+        comparisons = 0
+
+        for _ in range(ELEMENTS_TO_SORT):
+            for index in range(len(list_A)):
+                try:
+                    comparisons += 1
+                    if list_A[index] > list_A[index + 1]:
+                        writes_to_array += 2
+                        list_A[index], list_A[index + 1] = list_A[index + 1], list_A[index]
+                        draw(list_A)
+                        canvas.update()
+                except: pass
+        print(f"DEBUG INFO - Bubble Sort")
+        print(f"Time Taken {tm.perf_counter() - time1: 0.2f}s")
+        print(f"Writes to Array: {writes_to_array} - writes to Auxiliary array: 0")
+        print(f"Comparisons made: {comparisons}")
+        set_elements(list_A)
+    
+    def odd_even_sort(event):
+        time1 = tm.perf_counter()
+        list_A = elements[:]
+        writes_to_array = 0
+        comparisons = 0
+
+        sorted = False
+        while not sorted:
+            i = 0
+            sorted = True
+            is_even = 0
+            if len(list_A) % 2 == 0:
+                is_even = 0
+            else:
+                is_even = 1
+            try:
+                for _ in range((len(list_A)//2)+is_even + 1):
+                    if list_A[i] > list_A[i + 1]:
+                        comparisons += 1
+                        list_A[i], list_A[i + 1] = list_A[i + 1], list_A[i]
+                        writes_to_array += 2
+                        sorted = False
+                        draw(list_A)
+                        canvas.update()
+                    i += 2
+            except:
+                if is_even == 1:
+                    i -= 1
+                    if list_A[i] > list_A[i + 1]:
+                            comparisons += 1
+                            list_A[i], list_A[i + 1] = list_A[i + 1], list_A[i]
+                            writes_to_array += 2
+                            sorted = False
+                            draw(list_A)
+                            canvas.update()
+            i = len(list_A) - is_even
+            try:
+                for _ in range((len(list_A)//2)+is_even):
+                    i -= 2
+                    if i in (-1, 0):
+                        i = 1 + is_even
+                    if list_A[i] < list_A[i - 1]:
+                        list_A[i], list_A[i - 1] = list_A[i - 1], list_A[i]
+                        sorted = False
+                        draw(list_A)
+                        canvas.update()
+            except: pass
+
+        print(f"DEBUG INFO - Odd Even Sort")
+        print(f"Time Taken {tm.perf_counter() - time1: 0.2f}s")
+        print(f"Writes to Array: {writes_to_array} - writes to Auxiliary array: 0")
+        print(f"Comparisons made: {comparisons}")
+        set_elements(list_A)
+    
+    def shaker_sort(event):
+        time1 = tm.perf_counter()
+        list_A = elements[:]
+        writes_to_array = 0
+        comparisons = 0
+
+        for _ in range(ELEMENTS_TO_SORT//2):
+            for index in range(len(list_A)):
+                try:
+                    comparisons += 1
+                    if list_A[index] > list_A[index + 1]:
+                        writes_to_array += 2
+                        list_A[index], list_A[index + 1] = list_A[index + 1], list_A[index]
+                        draw(list_A)
+                        canvas.update()
+                except: pass
+            for index in range(len(list_A)):
+                try:
+                    comparisons += 1
+                    if list_A[abs(index - ELEMENTS_TO_SORT)] > list_A[abs(index - ELEMENTS_TO_SORT) + 1]:
+                        writes_to_array += 2
+                        list_A[abs(index - ELEMENTS_TO_SORT)], list_A[abs(index - ELEMENTS_TO_SORT) + 1] = list_A[abs(index - ELEMENTS_TO_SORT) + 1], list_A[abs(index - ELEMENTS_TO_SORT)]
+                        draw(list_A)
+                        canvas.update()
+                except: pass
+        print(f"DEBUG INFO - Shaker Sort")
+        print(f"Time Taken {tm.perf_counter() - time1: 0.2f}s")
+        print(f"Writes to Array: {writes_to_array} - writes to Auxiliary array: 0")
+        print(f"Comparisons made: {comparisons}")
+        set_elements(list_A)
+
+    draw(elements)
+    root.bind("<b>", bubble_sort)
+    root.bind("<space>", randomize)
+    root.bind("<o>", odd_even_sort)
+    root.bind("<s>", shaker_sort)
+    root.bind("<c>", rand_col)
+    root.mainloop()
+
+if __name__ == "__main__":
+    main()
